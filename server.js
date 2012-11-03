@@ -62,7 +62,6 @@ var requestListener = function (req, res) {
 			}
 			if (req.url.startsWith(SendMessageAction)) {
 				if (req.method == 'POST') {
-					console.log(body);
 					var bodyJson = qs.parse(body);
 					if (typeof bodyJson.message === "undefined") {
 						res.writeHead(403);

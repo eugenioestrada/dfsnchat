@@ -83,6 +83,7 @@
     
 			var hideUser = function() {
 				$(".user").hide();
+				$(".message_box").show();
 			};
 			
 			var changeUserName = function() {
@@ -142,14 +143,16 @@
 	</script>
 	<style>
 		body { margin: 0; background-image:url('bg.jpg'); font-family: 'Open Sans', sans-serif; font-size: 11pt }
-		h1 { color: #543A59 }
-		.container { width: 640px; margin: 0 auto; }
-		.container_inner { width: 640px; position: fixed; bottom: 0; padding: 10px; background-color: #fff}
+		h1 { color: #543A59; margin: 0 10px 0 10px }
+		.container { width: 640px; margin: 0 auto }
+		.container_inner { width: 640px; position: fixed; bottom: 0; padding: 10px; background-color: #fff; box-shadow: rgba(255, 255, 255, 0.2) 4px 2px 6px }
 		.chat ul { list-style-type: none; padding: 0; height: 320px; overflow:auto }
 		.message_box { margin: 2px auto }
 		.message_box input { width: 100% }
 		.powered_by_nodejs { position: fixed; margin: 10px; bottom: 0px; right: 0px } 
 		.powered_by_nodejs img { border: 0}
+		.difoosion_logo { position: fixed; margin: 10px; bottom: 0px; left: 0px } 
+		.difoosion_logo img { border: 0}
 	</style>
 </head>
 <body>
@@ -158,7 +161,7 @@
 			<h1>Difoosion Room</h1>
 
 			<div class="user">
-				<input type="text" id="username" />
+				Nombre: <input type="text" id="username" />
 			</div>
 			
 			<div class="chat">
@@ -167,8 +170,14 @@
 				</ul>
 			</div>
 				
-			<div class="message_box">
+			<div class="message_box" style="display: none">
 				<input type="text" id="message" />
+			</div>
+			
+			<div class="difoosion_logo">
+				<a href="http://difoosion.com" target="blank">
+					<img src="difoosion-logo.png" />
+				</a>
 			</div>
 			
 			<div class="powered_by_nodejs">

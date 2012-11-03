@@ -7,21 +7,24 @@
 	<script>
 		$(document).ready(function() {
 			var lastRequest = 0;
+			var userId = 0;
+			
 			var sendMessage = function() {
 				$.ajax({
 					type: "POST",
 					url: "SendMessage",
-					data: { message: $("#message").val() }
+					data: { message: $("#message").val(), userId : userId }
 				}).done(function( msg ) {
 					loadMessages();
 				});
 				$("#message").val("");
 			};
+			
 			var loadMessages = function() {
 				$.ajax({
-					type: "GET",
+					type: "POST",
 					url: "NewMessages",
-					data: { timestamp: lastRequest }
+					data: { timestamp: lastRequest, userId: userId }
 				}).done(function( response ) {
 					lastRequest = response.timestamp;
 					var messages = response.messages;
@@ -30,7 +33,7 @@
 					jQuery.each(messages, function() {
 						var timestamp = new Date(this.timestamp);
 						var time = timestamp.getHours().toString() + ":" + timestamp.getMinutes().toString() + ":" + timestamp.getSeconds().toString();
-						html += '<li>' + time + ": " + this.message + '</li>';
+						html += '<li>' + time + ": (" + this.name + ") " + this.message + '</li>';
 					});
 					$('#messages').append(html);
 					var messagesDiv = document.getElementById("messages");
@@ -47,9 +50,94 @@
 				}
 			});
 			
-			window.setInterval(loadMessages, 2500);
+			$("#username").keypress(function(e)
+			{
+				code = (e.keyCode ? e.keyCode : e.which);
+				if (code == 13) {
+					changeUserName();
+					e.preventDefault();
+				}
+			});
 			
-			loadMessages();
+			    
+			var createCookie = function (name,value,days) {
+				if (days) {
+					var date = new Date();
+					date.setTime(date.getTime()+(days*24*60*60*1000));
+					var expires = "; expires="+date.toGMTString();
+				}
+				else var expires = "";
+				document.cookie = name+"="+value+expires+"; path=/";
+			};
+			
+			var readCookie = function (name) {
+				var nameEQ = name + "=";
+				var ca = document.cookie.split(';');
+				for(var i=0;i < ca.length;i++) {
+					var c = ca[i];
+					while (c.charAt(0)==' ') c = c.substring(1,c.length);
+					if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+				}
+				return null;
+			};
+    
+			var hideUser = function() {
+				$(".user").hide();
+			};
+			
+			var changeUserName = function() {
+				var name = $("#username").val();
+				$.ajax({
+					type: "POST",
+					url: "Register",
+					data: { name: name }
+				}).done(function( response ) {
+					if (typeof response === "undefined") {
+
+					}
+					else {
+						var result = eval("(" + response + ")");
+						userId = result.id;
+						createCookie("userId", userId, 1);
+						createCookie("name", name, 1);
+						loadMessages();
+						hideUser();
+						window.setInterval(loadMessages, 2500);
+					}
+				}).fail(function() {
+					alert("Ese usuario ya se está usado");
+				});
+				$("#message").val("");
+			};
+			
+			var loadUser = function() {
+				userId = readCookie("userId");
+				var name = readCookie("name");
+				if (typeof userId === "undefined") {
+				
+				}
+				else {					
+					$.ajax({
+						type: "POST",
+						url: "CheckUser",
+						data: { name: name, userId : userId }
+					}).done(function( response ) {
+						if (typeof response === "undefined") {
+							
+						}
+						else {
+							var result = eval("(" + response + ")");
+							userId = result.id;
+							createCookie("userId", userId, 1);
+							loadMessages();
+							hideUser();
+							window.setInterval(loadMessages, 2500);
+						}
+					});
+				}
+			};
+			
+			loadUser();
 		});
 	</script>
 	<style>
@@ -69,6 +157,10 @@
 		<div class="container_inner">
 			<h1>Difoosion Room</h1>
 
+			<div class="user">
+				<input type="text" id="username" />
+			</div>
+			
 			<div class="chat">
 				<ul id="messages">
 					

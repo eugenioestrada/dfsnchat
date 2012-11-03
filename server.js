@@ -3,7 +3,8 @@ var http = require('http'),
     path = require('path'),
     fs = require('fs'),
     qs = require('querystring'),
-    Enumerable = require('linq');
+    Enumerable = require('linq'),
+    crypto = require('crypto');
 
 var mimeTypes = {
     "html": "text/html",
@@ -34,9 +35,11 @@ var HomeAction = "/";
 var NewMessagesAction = "/NewMessages";
 var SendMessageAction = "/SendMessage";
 var RegisterAction = "/Register";
+var CheckUserAction = "/CheckUser";
 
-var messages = [ { message: "Bienvenidos al Chat de Difoosion", timestamp: (new Date).getTime() } ];
+var messages = [ { message: "Bienvenidos al Chat de Difoosion", timestamp: (new Date).getTime(), name: "Servidor" } ];
 var buddies = [ ];
+var buddiesById = [ ];
 
 var requestListener = function (req, res) {
 	var body = "";
@@ -50,27 +53,48 @@ var requestListener = function (req, res) {
     path.exists(filename, function(exists) {
         if ( filename.endsWith("\\") || !exists ) {
 			if (req.url.startsWith(NewMessagesAction)) {
-				res.writeHead(200, { 'Content-Type': 'application/json' }); 
-				var newMessages = [];
-				var timestamp = parseInt(req.url.substring(req.url.indexOf("=") + 1));
-				Enumerable.From(messages).Where(function(msg) { return msg.timestamp > timestamp; }).Select().ForEach(function (msg)
-				{
-				    newMessages.push(msg);
-				});
-		  		res.write(JSON.stringify({ timestamp: (new Date()).getTime(), messages: newMessages }));
-		  		res.end();
+				if (req.method == 'POST') {
+					console.log("NewMessages: " + body);
+					var bodyJson = qs.parse(body);
+					console.log("NewMessages, userId: " + bodyJson.userId);
+					var buddy = buddiesById[bodyJson.userId];
+					if (typeof buddy === "undefined") {
+						res.writeHead(403);
+				  		res.end("Método no permitido");	
+					}
+					else {
+						buddy.timestamp = (new Date()).getTime();
+						res.writeHead(200, { 'Content-Type': 'application/json' }); 
+						var newMessages = [];
+						var timestamp = bodyJson.timestamp;
+						Enumerable.From(messages).Where(function(msg) { return msg.timestamp > timestamp; }).Select().ForEach(function (msg)
+						{
+						    newMessages.push(msg);
+						});
+				  		res.write(JSON.stringify({ timestamp: (new Date()).getTime(), messages: newMessages }));
+				  		res.end();
+					}
+				}
 			}
 			if (req.url.startsWith(SendMessageAction)) {
 				if (req.method == 'POST') {
+					console.log("SendMessage: " + body);
 					var bodyJson = qs.parse(body);
 					if (typeof bodyJson.message === "undefined") {
 						res.writeHead(403);
 						res.end("Debe escribir un mensaje");
 					}
 					else {
-					    messages.push({ message : bodyJson.message, timestamp: (new Date()).getTime()});
-						res.writeHead(200);
-				  		res.end("OK!");	
+						var buddy = buddiesById[bodyJson.userId];
+						if (typeof buddy === "undefined") {
+
+						}
+						else {
+							buddy.timestamp = (new Date()).getTime();
+							messages.push({ message : bodyJson.message, name: buddy.name, timestamp: (new Date()).getTime()});
+							res.writeHead(200);
+				  			res.end("OK!");	
+						}
 			  		}
 				}
 				else {
@@ -79,8 +103,78 @@ var requestListener = function (req, res) {
 				}
 			}
 			if (req.url.startsWith(RegisterAction)) {
-				res.writeHead(200);
-		  		res.end("Register");	
+				if (req.method == 'POST') {
+					console.log("Register: " + body);
+					var bodyJson = qs.parse(body);
+					if (typeof bodyJson.name === "undefined") {
+						res.writeHead(403);
+						res.end("Debe escribir un nombre");
+					}
+					else {
+						if (typeof buddies[bodyJson.name] === "undefined") {
+							var user = { name : bodyJson.name, timestamp: (new Date()).getTime() };
+							var generated = user.name + user.timestamp.toString();
+							user.id = generated;
+							console.log("saving a buddy with (" + user.name + ", " + user.id + ")");
+						    buddies[user.name] = user;
+						    buddiesById[user.id] = user;
+			  				res.write(JSON.stringify({ id: user.id }));
+			  				res.end();
+						}
+						else {
+							var time = (new Date()).getTime() - buddies[bodyJson.name].timestamp;
+							console.log("ha pasado: " + time);
+							if (time > 600000) {
+								var user = { name : bodyJson.name, timestamp: (new Date()).getTime() };
+								var generated = user.name + user.timestamp.toString();
+								user.id = generated;
+								console.log("saving a buddy with (" + user.name + ", " + user.id + ")");
+							    buddies[user.name] = user;
+							    buddiesById[user.id] = user;
+				  				res.write(JSON.stringify({ id: user.id }));
+				  				res.end();
+							}
+							else {
+								res.writeHead(403);
+				  				res.end("Ese usuario ya está registrado");
+							}
+						}
+			  		}
+				}
+				else {
+					res.writeHead(403);
+			  		res.end("Método no permitido");		
+				}
+			}
+			else if (req.url.startsWith(CheckUserAction)) {
+				if (req.method == 'POST') {
+					console.log("CheckUser: " + body);
+					var bodyJson = qs.parse(body);
+					if (typeof bodyJson.name === "undefined" || typeof bodyJson.userId === "undefined" ) {
+						res.writeHead(403);
+						res.end("Petición no válida");
+					}
+					else {
+						var buddy = buddiesById[bodyJson.userId];
+						if (typeof buddy === "undefined") {
+							res.writeHead(403);
+			  				res.end("Ese usuario ya está registrado");
+						}
+						else if (buddy == buddies[bodyJson.name] ) {
+							buddy.timestamp = (new Date()).getTime();
+			  				res.write(JSON.stringify({ id: buddy.id }));
+			  				res.end();
+						}
+						else {
+							res.writeHead(403);
+			  				res.end("Ese usuario ya está registrado");
+						}
+			  		}
+				}
+				else {
+					res.writeHead(403);
+			  		res.end("Método no permitido");		
+				}
 			}
 			else if (req.url == HomeAction) {
 		        res.writeHead(200, mimeType);

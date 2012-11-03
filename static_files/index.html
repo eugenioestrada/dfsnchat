@@ -10,7 +10,7 @@
 			var userId = 0;
 			var connected = false;
 			var loading = false;
-			
+			var fails = 0;
 			var sendMessage = function() {
 				var message = $("#message").val();
 				if (message != "") {
@@ -33,6 +33,7 @@
 						url: "NewMessages",
 						data: { timestamp: lastRequest, userId: userId }
 					}).done(function( response ) {
+						fails = 0;
 						loading = false;
 						lastRequest = response.timestamp;
 						var messages = response.messages;
@@ -47,11 +48,15 @@
 						var messagesDiv = document.getElementById("messages");
 						messagesDiv.scrollTop = messagesDiv.scrollHeight;
 					}).fail(function() {
-						loading = false;
-						connected = false;
-						$(".user").show();
-						$(".message_box").hide();
-						alert("El chat se ha desconectado");
+						fails = fails + 1;
+						if (fails == 3) {
+							fails = 0;
+							loading = false;
+							connected = false;
+							$(".user").show();
+							$(".message_box").hide();
+							alert("El chat se ha desconectado");
+						}
 					});
 				}
 			};

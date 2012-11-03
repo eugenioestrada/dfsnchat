@@ -8,6 +8,7 @@
 				$.post('SendMessage', { message: $("#message").val() }, function(result) {
 					loadMessages();
 				});
+				$("#message").val("");
 			};
 			var loadMessages = function() {
 				$.get('/NewMessages', function(messages) {
@@ -21,8 +22,13 @@
 				});
 			};
 			
-			$("#send").click(function() {
-				sendMessage();
+			$("#message").keypress(function(e)
+			{
+				code = (e.keyCode ? e.keyCode : e.which);
+				if (code == 13) {
+					sendMessage();
+					e.preventDefault();
+				}
 			});
 			
 			loadMessages();
@@ -34,8 +40,7 @@
 
 	<div id="chat"></div>
 
-	<form action="SendMessage" method="POST">
+	<form>
 		<input type="text" id="message" />
-		<input type="button" id="send" value="Enviar" />
 	</form>
 </body>

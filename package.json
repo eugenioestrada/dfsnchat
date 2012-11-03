@@ -7,10 +7,6 @@
     "type": "git",
     "url":  "https://github.com/eugenioestrada/dfsnchat.git"
   },
-  "dependencies": {
-    "socket.io": "0.x.x",
-	"websocket": "1.x.x"
-  },
   "engines" : {
 	"node": "0.6.x",
 	"npm": "1.0.x"

@@ -1,2 +1,10 @@
-npm install socket.io
-npm install websocket
+{
+  "name": "dfsn-chat",
+  "description": "Difoosion Chat",
+  "author": "Eugenio Estrada <eugenio@difoosion.com>",
+  "dependencies": {
+    "socket.io": "0.x.x",
+	"websocket": "1.x.x"
+  },
+  "engine": "node >= 0.4.1"
+}

@@ -9,25 +9,31 @@
 			var lastRequest = 0;
 			var userId = 0;
 			var connected = false;
+			var loading = false;
 			
 			var sendMessage = function() {
-				$.ajax({
-					type: "POST",
-					url: "SendMessage",
-					data: { message: $("#message").val(), userId : userId }
-				}).done(function( msg ) {
-					loadMessages();
-				});
-				$("#message").val("");
+				var message = $("#message").val();
+				if (message != "") {
+					$.ajax({
+						type: "POST",
+						url: "SendMessage",
+						data: { message: message, userId : userId }
+					}).done(function( msg ) {
+						loadMessages();
+					});
+					$("#message").val("");
+				}
 			};
 			
 			var loadMessages = function() {
-				if (connected) {
+				if (connected && !loading) {
+					loading = true;
 					$.ajax({
 						type: "POST",
 						url: "NewMessages",
 						data: { timestamp: lastRequest, userId: userId }
 					}).done(function( response ) {
+						loading = false;
 						lastRequest = response.timestamp;
 						var messages = response.messages;
 						var message = undefined;
@@ -41,6 +47,7 @@
 						var messagesDiv = document.getElementById("messages");
 						messagesDiv.scrollTop = messagesDiv.scrollHeight;
 					}).fail(function() {
+						loading = false;
 						connected = false;
 						$(".user").show();
 						$(".message_box").hide();
@@ -110,6 +117,8 @@
 						createCookie("userId", userId, 1);
 						createCookie("name", name, 1);
 						hideUser();
+						connected = true;
+						loadMessages();
 					}
 				}).fail(function() {
 					alert("Ese usuario ya se está usado");
@@ -137,6 +146,7 @@
 							userId = result.id;
 							createCookie("userId", userId, 1);
 							connected = true;
+							loadMessages();
 							hideUser();
 						}
 					});

@@ -2,7 +2,8 @@ var http = require('http'),
     url = require('url'),
     path = require('path'),
     fs = require('fs'),
-    qs = require('querystring');
+    qs = require('querystring'),
+    Enumerable = require('linq');
 
 var mimeTypes = {
     "html": "text/html",
@@ -50,13 +51,19 @@ var requestListener = function (req, res) {
         if ( filename.endsWith("\\") || !exists ) {
 			if (req.url.startsWith(NewMessagesAction)) {
 				res.writeHead(200, { 'Content-Type': 'application/json' }); 
-		  		res.write(JSON.stringify(messages));
+				var newMessages = [];
+				var timestamp = parseInt(req.url.substring(req.url.indexOf("=") + 1));
+				Enumerable.From(messages).Where(function(msg) { return msg.timestamp > timestamp; }).Select().ForEach(function (msg)
+				{
+				    newMessages.push(msg);
+				});
+		  		res.write(JSON.stringify({ timestamp: (new Date()).getTime(), messages: newMessages }));
 		  		res.end();
 			}
 			if (req.url.startsWith(SendMessageAction)) {
 				if (req.method == 'POST') {
 					var bodyJson = qs.parse(body);
-				    messages.push({ message : bodyJson.message, timestamp: (new Date).getTime()});
+				    messages.push({ message : bodyJson.message, timestamp: (new Date()).getTime()});
 					res.writeHead(200);
 			  		res.end("OK!");	
 				}

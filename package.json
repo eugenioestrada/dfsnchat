@@ -1,10 +1,18 @@
 {
   "name": "dfsn-chat",
+  "version" : "0.0.1",
   "description": "Difoosion Chat",
   "author": "Eugenio Estrada <eugenio@difoosion.com>",
+  "repository" : {
+    "type": "git",
+    "url":  "https://github.com/eugenioestrada/dfsnchat.git"
+  },
   "dependencies": {
     "socket.io": "0.x.x",
 	"websocket": "1.x.x"
   },
-  "engine": "node >= 0.4.1"
+  "engines" : {
+	"node": "0.6.x",
+	"npm": "1.0.x"
+  }
 }

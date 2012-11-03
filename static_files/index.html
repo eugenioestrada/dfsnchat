@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 	<title>Difoosion Chat</title>
@@ -7,13 +8,21 @@
 		$(document).ready(function() {
 			var lastRequest = 0;
 			var sendMessage = function() {
-				$.post('SendMessage', { message: $("#message").val() }, function(result) {
+				$.ajax({
+					type: "POST",
+					url: "SendMessage",
+					data: { message: $("#message").val() }
+				}).done(function( msg ) {
 					loadMessages();
 				});
 				$("#message").val("");
 			};
 			var loadMessages = function() {
-				$.get('/NewMessages',  { timestamp: lastRequest }, function(response) {
+				$.ajax({
+					type: "GET",
+					url: "NewMessages",
+					data: { timestamp: lastRequest }
+				}).done(function( response ) {
 					lastRequest = response.timestamp;
 					var messages = response.messages;
 					var message = undefined;

@@ -62,10 +62,17 @@ var requestListener = function (req, res) {
 			}
 			if (req.url.startsWith(SendMessageAction)) {
 				if (req.method == 'POST') {
+					console.log(body);
 					var bodyJson = qs.parse(body);
-				    messages.push({ message : bodyJson.message, timestamp: (new Date()).getTime()});
-					res.writeHead(200);
-			  		res.end("OK!");	
+					if (typeof bodyJson.message === undefined) {
+						res.writeHead(403);
+						res.end("Debe escribir un mensaje");
+					}
+					else {
+					    messages.push({ message : bodyJson.message, timestamp: (new Date()).getTime()});
+						res.writeHead(200);
+				  		res.end("OK!");	
+			  		}
 				}
 				else {
 					res.writeHead(403);

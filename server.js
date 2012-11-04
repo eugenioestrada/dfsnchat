@@ -55,64 +55,47 @@ var requestListener = function (req, res) {
         if ( filename.endsWith("\\") || !exists ) {
 			if (req.url.startsWith(NewMessagesAction)) {
 				if (req.method == 'POST') {
-					var bodyJson = qs.parse(body);
+					var bodyJson = qs.parse(body);					
 					var buddy = buddiesById[bodyJson.userId];
-					if (typeof buddy === "undefined") {
-						res.writeHead(404);
-				  		res.end("Método no permitido");	
-					}
-					else {
-						var time = (new Date()).getTime() - buddy.timestamp;
-						if (time < 600000) {
-							buddy.timestamp = (new Date()).getTime();
-							res.writeHead(200, { 'Content-Type': 'application/json' }); 
-							var newMessages = [];
-							var timestamp = bodyJson.timestamp;
-							Enumerable.From(messages).Where(function(msg) { return msg.timestamp > timestamp; }).Select().ForEach(function (msg)
-							{
-							    newMessages.push(msg);
-							});
-					  		res.write(JSON.stringify({ timestamp: (new Date()).getTime(), messages: newMessages }));
-					  		res.end();
-					  	}
-			  			else {
-			  				res.writeHead(403);
-		  					res.end("Método no permitido");
-			  			}
-					}
+					buddy.timestamp = (new Date()).getTime();
+					res.writeHead(200, { 'Content-Type': 'application/json' }); 
+					var newMessages = [];
+					var timestamp = bodyJson.timestamp;
+					Enumerable.From(messages).Where(function(msg) { return msg.timestamp > timestamp; }).Select().ForEach(function (msg)
+					{
+					    newMessages.push(msg);
+					});
+			  		res.write(JSON.stringify({ timestamp: (new Date()).getTime(), messages: newMessages }));
+			  		res.end();
+
 				}
+				else {
+		  				res.writeHead(403);
+	  					res.end("Método no permitido");
+	  			}
 			}
 			if (req.url.startsWith(GetBuddiesAction)) {
 				if (req.method == 'POST') {
 					var bodyJson = qs.parse(body);
 					var buddy = buddiesById[bodyJson.userId];
-					if (typeof buddy === "undefined") {
-						res.writeHead(404);
-				  		res.end("Método no permitido");	
-					}
-					else {
-						var time = (new Date()).getTime() - buddy.timestamp;
+					buddy.timestamp = (new Date()).getTime();
+					var friends = [];
+					for (key in buddies)
+					{
+						var buddy = buddies[key];
+						var time = ((new Date()).getTime() - buddy.timestamp);
 						if (time < 600000) {
-							buddy.timestamp = (new Date()).getTime();
-							var friends = [];
-							for (key in buddies)
-							{
-								var buddy = buddies[key];
-								var time = ((new Date()).getTime() - buddy.timestamp);
-								if (time < 600000) {
-									friends.push({ name : buddy.name });	
-								}
-							}
-
-					  		res.write(JSON.stringify(friends));
-					  		res.end();
-				  		}
-			  			else {
-			  				res.writeHead(403);
-		  					res.end("Método no permitido");
-			  			}
+							friends.push({ name : buddy.name });	
+						}
 					}
-				}
+
+			  		res.write(JSON.stringify(friends));
+			  		res.end();
+		  		}
+		  		else {
+		  				res.writeHead(403);
+	  					res.end("Método no permitido");
+		  		}
 			}
 			if (req.url.startsWith(SendMessageAction)) {
 				if (req.method == 'POST') {

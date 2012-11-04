@@ -58,7 +58,7 @@ var requestListener = function (req, res) {
 					var bodyJson = qs.parse(body);
 					var buddy = buddiesById[bodyJson.userId];
 					if (typeof buddy === "undefined") {
-						res.writeHead(403);
+						res.writeHead(404);
 				  		res.end("Método no permitido");	
 					}
 					else {
@@ -87,7 +87,7 @@ var requestListener = function (req, res) {
 					var bodyJson = qs.parse(body);
 					var buddy = buddiesById[bodyJson.userId];
 					if (typeof buddy === "undefined") {
-						res.writeHead(403);
+						res.writeHead(404);
 				  		res.end("Método no permitido");	
 					}
 					else {
@@ -118,7 +118,7 @@ var requestListener = function (req, res) {
 				if (req.method == 'POST') {
 					var bodyJson = qs.parse(body);
 					if (typeof bodyJson.message === "undefined") {
-						res.writeHead(403);
+						res.writeHead(404);
 						res.end("Debe escribir un mensaje");
 					}
 					else {
@@ -135,7 +135,7 @@ var requestListener = function (req, res) {
 					  			res.end("OK!");	
 				  			}
 				  			else {
-				  				res.writeHead(403);
+				  				res.writeHead(500);
 			  					res.end("Método no permitido");
 				  			}
 						}
@@ -150,7 +150,7 @@ var requestListener = function (req, res) {
 				if (req.method == 'POST') {
 					var bodyJson = qs.parse(body);
 					if (typeof bodyJson.name === "undefined") {
-						res.writeHead(403);
+						res.writeHead(404);
 						res.end("Debe escribir un nombre");
 					}
 					else {
@@ -175,7 +175,7 @@ var requestListener = function (req, res) {
 				  				res.end();
 							}
 							else {
-								res.writeHead(403);
+								res.writeHead(500);
 				  				res.end("Ese usuario ya está registrado");
 							}
 						}
@@ -196,7 +196,7 @@ var requestListener = function (req, res) {
 					else {
 						var buddy = buddiesById[bodyJson.userId];
 						if (typeof buddy === "undefined") {
-							res.writeHead(403);
+							res.writeHead(404);
 			  				res.end("Ese usuario ya está registrado");
 						}
 						else if (buddy == buddies[bodyJson.name] ) {
@@ -205,13 +205,13 @@ var requestListener = function (req, res) {
 			  				res.end();
 						}
 						else {
-							res.writeHead(403);
+							res.writeHead(500);
 			  				res.end("Ese usuario ya está registrado");
 						}
 			  		}
 				}
 				else {
-					res.writeHead(403);
+					res.writeHead(501);
 			  		res.end("Método no permitido");		
 				}
 			}

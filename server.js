@@ -55,9 +55,7 @@ var requestListener = function (req, res) {
         if ( filename.endsWith("\\") || !exists ) {
 			if (req.url.startsWith(NewMessagesAction)) {
 				if (req.method == 'POST') {
-					console.log("NewMessages: " + body);
 					var bodyJson = qs.parse(body);
-					console.log("NewMessages, userId: " + bodyJson.userId);
 					var buddy = buddiesById[bodyJson.userId];
 					if (typeof buddy === "undefined") {
 						res.writeHead(403);
@@ -79,9 +77,7 @@ var requestListener = function (req, res) {
 			}
 			if (req.url.startsWith(GetBuddiesAction)) {
 				if (req.method == 'POST') {
-					console.log("GetBuddies: " + body);
 					var bodyJson = qs.parse(body);
-					console.log("GetBuddies, userId: " + bodyJson.userId);
 					var buddy = buddiesById[bodyJson.userId];
 					if (typeof buddy === "undefined") {
 						res.writeHead(403);
@@ -105,7 +101,6 @@ var requestListener = function (req, res) {
 			}
 			if (req.url.startsWith(SendMessageAction)) {
 				if (req.method == 'POST') {
-					console.log("SendMessage: " + body);
 					var bodyJson = qs.parse(body);
 					if (typeof bodyJson.message === "undefined") {
 						res.writeHead(403);
@@ -131,7 +126,6 @@ var requestListener = function (req, res) {
 			}
 			if (req.url.startsWith(RegisterAction)) {
 				if (req.method == 'POST') {
-					console.log("Register: " + body);
 					var bodyJson = qs.parse(body);
 					if (typeof bodyJson.name === "undefined") {
 						res.writeHead(403);
@@ -142,7 +136,6 @@ var requestListener = function (req, res) {
 							var user = { name : bodyJson.name, timestamp: (new Date()).getTime() };
 							var generated = user.name + user.timestamp.toString();
 							user.id = generated;
-							console.log("saving a buddy with (" + user.name + ", " + user.id + ")");
 						    buddies[user.name] = user;
 						    buddiesById[user.id] = user;
 			  				res.write(JSON.stringify({ id: user.id }));
@@ -150,12 +143,10 @@ var requestListener = function (req, res) {
 						}
 						else {
 							var time = (new Date()).getTime() - buddies[bodyJson.name].timestamp;
-							console.log("ha pasado: " + time);
 							if (time > 600000) {
 								var user = { name : bodyJson.name, timestamp: (new Date()).getTime() };
 								var generated = user.name + user.timestamp.toString();
 								user.id = generated;
-								console.log("saving a buddy with (" + user.name + ", " + user.id + ")");
 							    buddies[user.name] = user;
 							    buddiesById[user.id] = user;
 				  				res.write(JSON.stringify({ id: user.id }));
@@ -175,7 +166,6 @@ var requestListener = function (req, res) {
 			}
 			else if (req.url.startsWith(CheckUserAction)) {
 				if (req.method == 'POST') {
-					console.log("CheckUser: " + body);
 					var bodyJson = qs.parse(body);
 					if (typeof bodyJson.name === "undefined" || typeof bodyJson.userId === "undefined" ) {
 						res.writeHead(403);

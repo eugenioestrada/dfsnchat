@@ -22,6 +22,7 @@
 						loadMessages();
 					});
 					$("#message").val("");
+					scrollToBottom();
 				}
 			};
 			
@@ -41,12 +42,31 @@
 						var html = "";
 						jQuery.each(messages, function() {
 							var timestamp = new Date(this.timestamp);
-							var time = timestamp.getHours().toString() + ":" + timestamp.getMinutes().toString() + ":" + timestamp.getSeconds().toString();
+							var hours = timestamp.getHours().toString();
+							if (hours.length == 1) {
+								hours = "0" + hours;
+							}
+							
+							var minutes = timestamp.getMinutes().toString();
+							if (minutes.length == 1) {
+								minutes = "0" + minutes;
+							}
+							
+							var seconds = timestamp.getSeconds().toString();
+							if (seconds.length == 1) {
+								seconds = "0" + seconds;
+							}
+							
+							var time = hours + ":" + minutes + ":" + seconds;
 							html += '<li>' + time + ": (" + this.name + ") " + this.message + '</li>';
 						});
-						$('#messages').append(html);
-						var messagesDiv = document.getElementById("messages");
-						messagesDiv.scrollTop = messagesDiv.scrollHeight;
+						
+						var messagesList = $('#messages');
+						var goToBottom = messagesList[0].scrollHeight - messagesList.scrollTop() == messagesList.outerHeight();
+						messagesList.append(html);
+						if (goToBottom) {
+							scrollToBottom();
+						}
 					}).fail(function() {
 						fails = fails + 1;
 						if (fails == 3) {
@@ -59,6 +79,11 @@
 						}
 					});
 				}
+			};
+			
+			var scrollToBottom = function() {
+				var messagesDiv = document.getElementById("messages");
+				messagesDiv.scrollTop = messagesDiv.scrollHeight;
 			};
 			
 			$("#message").keypress(function(e)
@@ -163,9 +188,10 @@
 	</script>
 	<style>
 		body { margin: 0; background-image:url('bg.jpg'); font-family: 'Open Sans', sans-serif; font-size: 11pt }
-		h1 { color: #543A59; margin: 0 }
+		.header { background-color: #220D26; color: #ddd; margin: 0; padding: 10px; font-weight: bold }
 		.container { width: 640px; margin: 0 auto }
-		.container_inner { width: 640px; position: fixed; bottom: 0; padding: 10px; background-color: #fff; box-shadow: rgba(255, 255, 255, 0.2) 4px 2px 6px }
+		.container_inner { width: 640px; position: fixed; bottom: 0; background-color: #fff; box-shadow: rgba(255, 255, 255, 0.2) 4px 2px 6px }
+		.chat_container { padding: 10px }
 		.chat ul { list-style-type: none; padding: 0; height: 320px; overflow:auto }
 		.message_box { margin: 2px auto }
 		.message_box input { width: 100% }
@@ -178,20 +204,22 @@
 <body>
 	<div class="container">
 		<div class="container_inner">
-			<h1>Difoosion Room</h1>
-
-			<div class="user">
-				Nombre: <input type="text" id="username" />
-			</div>
+			<div class="header">Difoosion Room</div>
 			
-			<div class="chat">
-				<ul id="messages">
-					
-				</ul>
-			</div>
+			<div class="chat_container">
+				<div class="user">
+					Nombre: <input type="text" id="username" />
+				</div>
 				
-			<div class="message_box" style="display: none">
-				<input type="text" id="message" />
+				<div class="chat">
+					<ul id="messages">
+						
+					</ul>
+				</div>
+					
+				<div class="message_box" style="display: none">
+					<input type="text" id="message" />
+				</div>
 			</div>
 			
 			<div class="difoosion_logo">

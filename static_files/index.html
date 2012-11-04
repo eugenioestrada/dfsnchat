@@ -55,7 +55,6 @@
 						data: { timestamp: lastRequest, userId: userId }
 					}).done(function( response ) {
 						fails = 0;
-						loading = false;
 						lastRequest = response.timestamp;
 						var messages = response.messages;
 						var message = undefined;
@@ -86,6 +85,7 @@
 						if (goToBottom) {
 							scrollToBottom();
 						}
+						loading = false;
 					}).fail(function() {
 						fails = fails + 1;
 						if (fails == 3) {

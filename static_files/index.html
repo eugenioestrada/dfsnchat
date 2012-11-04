@@ -78,10 +78,15 @@
 							alert("El chat se ha desconectado");
 						}
 					});
+				}
+			};
+			
+			var loadBuddies = function() {
+				if (connected) {
 					$.ajax({
 						type: "POST",
 						url: "GetBuddies",
-						data: { timestamp: lastRequest, userId: userId }
+						data: { userId: userId }
 					}).done(function( response ) {
 						var buddies = eval("(" + response + ")");
 						var html = "";
@@ -163,6 +168,7 @@
 						hideUser();
 						connected = true;
 						refresh();
+						loadBuddies();
 					}
 				}).fail(function() {
 					alert("Ese usuario ya se está usado");
@@ -191,12 +197,14 @@
 							createCookie("userId", userId, 1);
 							connected = true;
 							refresh();
+							loadBuddies();
 							hideUser();
 						}
 					});
 				}
 			};
 			window.setInterval(refresh, 2500);
+			window.setInterval(loadBuddies, 10000);
 			loadUser();
 			$("#username").focus();
 		});

@@ -92,7 +92,8 @@ var requestListener = function (req, res) {
 						for (key in buddies)
 						{
 							var buddy = buddies[key];
-							if (timestamp < 600000) {
+							var time = ((new Date()).getTime() - buddy.timestamp);
+							if (time < 600000) {
 								friends.push({ name : buddy.name });	
 							}
 						}

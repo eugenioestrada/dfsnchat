@@ -62,16 +62,23 @@ var requestListener = function (req, res) {
 				  		res.end("Método no permitido");	
 					}
 					else {
-						buddy.timestamp = (new Date()).getTime();
-						res.writeHead(200, { 'Content-Type': 'application/json' }); 
-						var newMessages = [];
-						var timestamp = bodyJson.timestamp;
-						Enumerable.From(messages).Where(function(msg) { return msg.timestamp > timestamp; }).Select().ForEach(function (msg)
-						{
-						    newMessages.push(msg);
-						});
-				  		res.write(JSON.stringify({ timestamp: (new Date()).getTime(), messages: newMessages }));
-				  		res.end();
+						var time = (new Date()).getTime() - buddy.timestamp;
+						if (time < 600000) {
+							buddy.timestamp = (new Date()).getTime();
+							res.writeHead(200, { 'Content-Type': 'application/json' }); 
+							var newMessages = [];
+							var timestamp = bodyJson.timestamp;
+							Enumerable.From(messages).Where(function(msg) { return msg.timestamp > timestamp; }).Select().ForEach(function (msg)
+							{
+							    newMessages.push(msg);
+							});
+					  		res.write(JSON.stringify({ timestamp: (new Date()).getTime(), messages: newMessages }));
+					  		res.end();
+					  	}
+			  			else {
+			  				res.writeHead(403);
+		  					res.end("Método no permitido");
+			  			}
 					}
 				}
 			}
@@ -84,18 +91,26 @@ var requestListener = function (req, res) {
 				  		res.end("Método no permitido");	
 					}
 					else {
-						var friends = [];
-						for (key in buddies)
-						{
-							var buddy = buddies[key];
-							var time = ((new Date()).getTime() - buddy.timestamp);
-							if (time < 600000) {
-								friends.push({ name : buddy.name });	
+						var time = (new Date()).getTime() - buddy.timestamp;
+						if (time < 600000) {
+							buddy.timestamp = (new Date()).getTime();
+							var friends = [];
+							for (key in buddies)
+							{
+								var buddy = buddies[key];
+								var time = ((new Date()).getTime() - buddy.timestamp);
+								if (time < 600000) {
+									friends.push({ name : buddy.name });	
+								}
 							}
-						}
 
-				  		res.write(JSON.stringify(friends));
-				  		res.end();
+					  		res.write(JSON.stringify(friends));
+					  		res.end();
+				  		}
+			  			else {
+			  				res.writeHead(403);
+		  					res.end("Método no permitido");
+			  			}
 					}
 				}
 			}
@@ -112,10 +127,17 @@ var requestListener = function (req, res) {
 
 						}
 						else {
-							buddy.timestamp = (new Date()).getTime();
-							messages.push({ message : bodyJson.message, name: buddy.name, timestamp: (new Date()).getTime()});
-							res.writeHead(200);
-				  			res.end("OK!");	
+							var time = (new Date()).getTime() - buddy.timestamp;
+							if (time < 600000) {
+								buddy.timestamp = (new Date()).getTime();
+								messages.push({ message : bodyJson.message, name: buddy.name, timestamp: (new Date()).getTime()});
+								res.writeHead(200);
+					  			res.end("OK!");	
+				  			}
+				  			else {
+				  				res.writeHead(403);
+			  					res.end("Método no permitido");
+				  			}
 						}
 			  		}
 				}

@@ -11,6 +11,8 @@
 			var connected = false;
 			var loading = false;
 			var fails = 0;
+			var nuevosMensajes = 0;
+
 			var sendMessage = function() {
 				var message = $("#message").val();
 				if (message != "") {
@@ -25,6 +27,18 @@
 					scrollToBottom();
 				}
 			};
+
+			var isActive = true;
+
+			$(window).focus(function() {
+				isActive = true;
+				document.title = "Difoosion Chat";
+			});
+
+			$(window).blur(function() {
+				isActive = false;
+				nuevosMensajes = 0;
+			});
 			
 			var refresh = function() {
 				if (connected && !loading) {
@@ -40,6 +54,17 @@
 						var messages = response.messages;
 						var message = undefined;
 						var html = "";
+
+						if (isActive == false) {
+							nuevosMensajes = nuevosMensajes + messages.length;
+							if (nuevosMensajes > 0) {
+								document.title = "Nuevos mensajes (" + nuevosMensajes + ") - Difoosion Chat";
+							}
+							else {
+								document.title = "Difoosion Chat";
+							}
+						}
+
 						jQuery.each(messages, function() {
 							var timestamp = new Date(this.timestamp);
 							var hours = timestamp.getHours().toString();

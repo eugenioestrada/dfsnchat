@@ -129,6 +129,7 @@
 			var hideUser = function() {
 				$(".user").hide();
 				$(".message_box").show();
+				$("#message").focus();
 			};
 			
 			var changeUserName = function() {
@@ -184,6 +185,7 @@
 			};
 			window.setInterval(loadMessages, 2500);
 			loadUser();
+			$("#username").focus();
 		});
 	</script>
 	<style>

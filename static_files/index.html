@@ -12,6 +12,11 @@
 			var loading = false;
 			var fails = 0;
 			var nuevosMensajes = 0;
+			var lastName = "";
+
+			if ($.browser.webkit) {
+    			$("#message").attr("autocomplete", "off");
+			}
 
 			var sendMessage = function() {
 				var message = $("#message").val();
@@ -67,24 +72,12 @@
 						}
 
 						jQuery.each(messages, function() {
-							var timestamp = new Date(this.timestamp);
-							var hours = timestamp.getHours().toString();
-							if (hours.length == 1) {
-								hours = "0" + hours;
+							if (this.name != lastName) {
+								lastName = this.name;
+								html += '<li class="user">' + this.name + '</li>';
 							}
-							
-							var minutes = timestamp.getMinutes().toString();
-							if (minutes.length == 1) {
-								minutes = "0" + minutes;
-							}
-							
-							var seconds = timestamp.getSeconds().toString();
-							if (seconds.length == 1) {
-								seconds = "0" + seconds;
-							}
-							
-							var time = hours + ":" + minutes + ":" + seconds;
-							html += '<li>' + time + ": (" + this.name + ") " + this.message + '</li>';
+
+							html += '<li>' + this.message + '</li>';
 						});
 						
 						var messagesList = $('#messages');
@@ -243,6 +236,7 @@
 		.container_inner { width: 640px; position: fixed; bottom: 0; background-color: #fff; box-shadow: rgba(10, 10, 10, 0.6) 0 0 40px 20px }
 		.inner { padding: 10px }
 		.chat ul { list-style-type: none; padding: 0; height: 320px; overflow:auto }
+		.user { font-weight: bold; margin-bottom: 10px; margin-top: 20px }
 		.buddies_box { position: fixed; right: 0; width: 160px; background-color: #fff; top: 50%; box-shadow: rgba(10, 10, 10, 0.6) 0 0 30px 15px }
 		.buddies ul { list-style-type: none; padding: 0; height: 160px; overflow:auto }
 		.message_box { margin: 2px auto }

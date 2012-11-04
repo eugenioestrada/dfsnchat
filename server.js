@@ -224,7 +224,6 @@ var requestListener = function (req, res) {
 						res.end("Petición no válida");
 					}
 					else {
-						console.log(bodyJson.userId);
 						if (buddies.containsId(bodyJson.userId)) {
 							var buddy = buddies.getById(bodyJson.userId);
 							buddy.timestamp = (new Date()).getTime();

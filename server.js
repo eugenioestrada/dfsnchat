@@ -57,7 +57,10 @@ var requestListener = function (req, res) {
 				if (req.method == 'POST') {
 					var bodyJson = qs.parse(body);					
 					var buddy = buddiesById[bodyJson.userId];
-					buddy.timestamp = (new Date()).getTime();
+					if (typeof buddy != 'undefined') {
+						buddy.timestamp = (new Date()).getTime();
+					}
+					
 					res.writeHead(200, { 'Content-Type': 'application/json' }); 
 					var newMessages = [];
 					var timestamp = bodyJson.timestamp;
@@ -78,7 +81,10 @@ var requestListener = function (req, res) {
 				if (req.method == 'POST') {
 					var bodyJson = qs.parse(body);
 					var buddy = buddiesById[bodyJson.userId];
-					buddy.timestamp = (new Date()).getTime();
+					if (typeof buddy != 'undefined') {
+						buddy.timestamp = (new Date()).getTime();
+					}
+
 					var friends = [];
 					for (key in buddies)
 					{
@@ -88,7 +94,6 @@ var requestListener = function (req, res) {
 							friends.push({ name : buddy.name });	
 						}
 					}
-
 			  		res.write(JSON.stringify(friends));
 			  		res.end();
 		  		}

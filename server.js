@@ -14,6 +14,8 @@ var mimeTypes = {
     "js": "text/javascript",
     "css": "text/css"};
 
+var timeout = 600000;
+
 // Helpers
 
 if (typeof String.prototype.startsWith != 'function') {
@@ -39,8 +41,64 @@ var CheckUserAction = "/CheckUser";
 var GetBuddiesAction = "/GetBuddies";
 
 var messages = [ { message: "Bienvenidos al Chat de Difoosion", timestamp: (new Date).getTime(), name: "Servidor" } ];
-var buddies = [ ];
-var buddiesById = [ ];
+
+var BuddyStore = (function () {
+    function BuddyStore() {
+        this.buddiesById = [];
+        this.buddiesByName = [];
+    }
+    BuddyStore.prototype.add = function (id, name, timestamp) {
+        this.removeName(name);
+        var buddy = new Buddy(id, name, timestamp);
+        this.buddiesById[id] = buddy;
+        this.buddiesByName[name] = buddy;
+    };
+    BuddyStore.prototype.containsId = function (id) {
+        return this.buddiesById[id] != null;
+    };
+    BuddyStore.prototype.containsName = function (name) {
+        return this.buddiesByName[name] != null;
+    };
+    BuddyStore.prototype.getById = function (id) {
+        return this.buddiesById[id];
+    };
+    BuddyStore.prototype.getByName = function (name) {
+        return this.buddiesByName[name];
+    };
+    BuddyStore.prototype.getAll = function () {
+        var buddies = new Array();
+        for(var id in this.buddiesById) {
+            buddies.push(this.getById(id));
+        }
+        return buddies;
+    };
+    BuddyStore.prototype.removeId = function (id) {
+        if(this.containsId(id)) {
+            var buddy = this.getById(id);
+            delete this.buddiesByName[buddy.name];
+            delete this.buddiesById[id];
+        }
+    };
+    BuddyStore.prototype.removeName = function (name) {
+        if(this.containsName(name)) {
+            var buddy = this.getByName(name);
+            delete this.buddiesById[buddy.id];
+            delete this.buddiesByName[name];
+        }
+    };
+    return BuddyStore;
+})();
+
+var Buddy = (function () {
+    function Buddy(id, name, timestamp) {
+        this.id = id;
+        this.name = name;
+        this.timestamp = timestamp;
+    }
+    return Buddy;
+})();
+
+var buddies = new BuddyStore();
 
 var requestListener = function (req, res) {
 	var body = "";
@@ -56,11 +114,11 @@ var requestListener = function (req, res) {
 			if (req.url.startsWith(NewMessagesAction)) {
 				if (req.method == 'POST') {
 					var bodyJson = qs.parse(body);					
-					var buddy = buddiesById[bodyJson.userId];
-					if (typeof buddy != 'undefined') {
+					if (buddies.containsId(bodyJson.userId)) {
+						var buddy = buddies.getById(bodyJson.userId);
 						buddy.timestamp = (new Date()).getTime();
 					}
-					
+
 					res.writeHead(200, { 'Content-Type': 'application/json' }); 
 					var newMessages = [];
 					var timestamp = bodyJson.timestamp;
@@ -68,6 +126,7 @@ var requestListener = function (req, res) {
 					{
 					    newMessages.push(msg);
 					});
+
 			  		res.write(JSON.stringify({ timestamp: (new Date()).getTime(), messages: newMessages }));
 			  		res.end();
 
@@ -80,21 +139,11 @@ var requestListener = function (req, res) {
 			if (req.url.startsWith(GetBuddiesAction)) {
 				if (req.method == 'POST') {
 					var bodyJson = qs.parse(body);
-					var buddy = buddiesById[bodyJson.userId];
-					if (typeof buddy != 'undefined') {
+					if (buddies.containsId(bodyJson.userId)) {
+						var buddy = buddies.getById(bodyJson.userId);
 						buddy.timestamp = (new Date()).getTime();
 					}
-
-					var friends = [];
-					for (key in buddies)
-					{
-						var buddy = buddies[key];
-						var time = ((new Date()).getTime() - buddy.timestamp);
-						if (time < 600000) {
-							friends.push({ name : buddy.name });	
-						}
-					}
-			  		res.write(JSON.stringify(friends));
+			  		res.write(JSON.stringify(buddies.getAll()));
 			  		res.end();
 		  		}
 		  		else {
@@ -110,13 +159,10 @@ var requestListener = function (req, res) {
 						res.end("Debe escribir un mensaje");
 					}
 					else {
-						var buddy = buddiesById[bodyJson.userId];
-						if (typeof buddy === "undefined") {
-
-						}
-						else {
+						if (buddies.containsId(bodyJson.userId)) {
+							var buddy = buddies.getById(bodyJson.userId);
 							var time = (new Date()).getTime() - buddy.timestamp;
-							if (time < 600000) {
+							if (time < timeout) {
 								buddy.timestamp = (new Date()).getTime();
 								messages.push({ message : bodyJson.message, name: buddy.name, timestamp: (new Date()).getTime()});
 								res.writeHead(200);
@@ -142,30 +188,26 @@ var requestListener = function (req, res) {
 						res.end("Debe escribir un nombre");
 					}
 					else {
-						if (typeof buddies[bodyJson.name] === "undefined") {
-							var user = { name : bodyJson.name, timestamp: (new Date()).getTime() };
-							var generated = user.name + user.timestamp.toString();
-							user.id = generated;
-						    buddies[user.name] = user;
-						    buddiesById[user.id] = user;
-			  				res.write(JSON.stringify({ id: user.id }));
-			  				res.end();
-						}
-						else {
-							var time = (new Date()).getTime() - buddies[bodyJson.name].timestamp;
-							if (time > 600000) {
-								var user = { name : bodyJson.name, timestamp: (new Date()).getTime() };
-								var generated = user.name + user.timestamp.toString();
-								user.id = generated;
-							    buddies[user.name] = user;
-							    buddiesById[user.id] = user;
-				  				res.write(JSON.stringify({ id: user.id }));
+						var name = bodyJson.name;
+						var timestamp = (new Date()).getTime();
+						var id = name + timestamp.toString();
+						if (buddies.containsName(name)) {
+							var buddy = buddies.getByName(name);
+							var time = timestamp - buddy.timestamp;
+							if (time > timeout) {
+								buddies.add(id, name, timestamp);
+				  				res.write(JSON.stringify({ id: id }));
 				  				res.end();
 							}
 							else {
 								res.writeHead(500);
 				  				res.end("Ese usuario ya está registrado");
 							}
+						}
+						else {
+							buddies.add(id, name, timestamp);
+			  				res.write(JSON.stringify({ id: id }));
+			  				res.end();
 						}
 			  		}
 				}
@@ -182,19 +224,16 @@ var requestListener = function (req, res) {
 						res.end("Petición no válida");
 					}
 					else {
-						var buddy = buddiesById[bodyJson.userId];
-						if (typeof buddy === "undefined") {
-							res.writeHead(404);
-			  				res.end("Ese usuario ya está registrado");
-						}
-						else if (buddy == buddies[bodyJson.name] ) {
+						console.log(bodyJson.userId);
+						if (buddies.containsId(bodyJson.userId)) {
+							var buddy = buddies.getById(bodyJson.userId);
 							buddy.timestamp = (new Date()).getTime();
 			  				res.write(JSON.stringify({ id: buddy.id }));
 			  				res.end();
 						}
 						else {
 							res.writeHead(500);
-			  				res.end("Ese usuario ya está registrado");
+			  				res.end("Ese usuario no existe");
 						}
 			  		}
 				}

@@ -36,6 +36,7 @@ var NewMessagesAction = "/NewMessages";
 var SendMessageAction = "/SendMessage";
 var RegisterAction = "/Register";
 var CheckUserAction = "/CheckUser";
+var GetBuddiesAction = "/GetBuddies";
 
 var messages = [ { message: "Bienvenidos al Chat de Difoosion", timestamp: (new Date).getTime(), name: "Servidor" } ];
 var buddies = [ ];
@@ -72,6 +73,31 @@ var requestListener = function (req, res) {
 						    newMessages.push(msg);
 						});
 				  		res.write(JSON.stringify({ timestamp: (new Date()).getTime(), messages: newMessages }));
+				  		res.end();
+					}
+				}
+			}
+			if (req.url.startsWith(GetBuddiesAction)) {
+				if (req.method == 'POST') {
+					console.log("GetBuddies: " + body);
+					var bodyJson = qs.parse(body);
+					console.log("GetBuddies, userId: " + bodyJson.userId);
+					var buddy = buddiesById[bodyJson.userId];
+					if (typeof buddy === "undefined") {
+						res.writeHead(403);
+				  		res.end("Método no permitido");	
+					}
+					else {
+						var friends = [];
+						for (key in buddies)
+						{
+							var buddy = buddies[key];
+							if (timestamp < 600000) {
+								friends.push({ name : buddy.name });	
+							}
+						}
+
+				  		res.write(JSON.stringify(friends));
 				  		res.end();
 					}
 				}

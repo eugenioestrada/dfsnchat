@@ -19,14 +19,14 @@
 						url: "SendMessage",
 						data: { message: message, userId : userId }
 					}).done(function( msg ) {
-						loadMessages();
+						refresh();
 					});
 					$("#message").val("");
 					scrollToBottom();
 				}
 			};
 			
-			var loadMessages = function() {
+			var refresh = function() {
 				if (connected && !loading) {
 					loading = true;
 					$.ajax({
@@ -77,6 +77,19 @@
 							$(".message_box").hide();
 							alert("El chat se ha desconectado");
 						}
+					});
+					$.ajax({
+						type: "POST",
+						url: "GetBuddies",
+						data: { timestamp: lastRequest, userId: userId }
+					}).done(function( response ) {
+						var buddies = eval("(" + response + ")");
+						var html = "";
+						jQuery.each(buddies, function() {
+							html += "<li>" + this.name + "</li>";
+						});
+						$("#connected").empty();
+						$("#connected").append(html);
 					});
 				}
 			};
@@ -149,7 +162,7 @@
 						createCookie("name", name, 1);
 						hideUser();
 						connected = true;
-						loadMessages();
+						refresh();
 					}
 				}).fail(function() {
 					alert("Ese usuario ya se está usado");
@@ -177,13 +190,13 @@
 							userId = result.id;
 							createCookie("userId", userId, 1);
 							connected = true;
-							loadMessages();
+							refresh();
 							hideUser();
 						}
 					});
 				}
 			};
-			window.setInterval(loadMessages, 2500);
+			window.setInterval(refresh, 2500);
 			loadUser();
 			$("#username").focus();
 		});
@@ -193,8 +206,10 @@
 		.header { background-color: #220D26; color: #ddd; margin: 0; padding: 10px; font-weight: bold }
 		.container { width: 640px; margin: 0 auto }
 		.container_inner { width: 640px; position: fixed; bottom: 0; background-color: #fff; box-shadow: rgba(10, 10, 10, 0.6) 0 0 40px 20px }
-		.chat_container { padding: 10px }
+		.inner { padding: 10px }
 		.chat ul { list-style-type: none; padding: 0; height: 320px; overflow:auto }
+		.buddies_box { position: fixed; right: 0; width: 160px; background-color: #fff; top: 50% }
+		.buddies ul { list-style-type: none; padding: 0; height: 160px; overflow:auto }
 		.message_box { margin: 2px auto }
 		.message_box input { width: 100% }
 		.powered_by_nodejs { position: fixed; margin: 10px; bottom: 0px; right: 0px } 
@@ -208,7 +223,7 @@
 		<div class="container_inner">
 			<div class="header">Difoosion Room</div>
 			
-			<div class="chat_container">
+			<div class="inner">
 				<div class="user">
 					Nombre: <input type="text" id="username" />
 				</div>
@@ -223,18 +238,27 @@
 					<input type="text" id="message" />
 				</div>
 			</div>
-			
-			<div class="difoosion_logo">
-				<a href="http://difoosion.com" target="blank">
-					<img src="difoosion-logo.png" />
-				</a>
-			</div>
-			
-			<div class="powered_by_nodejs">
-				<a href="http://nodejs.org" target="blank">
-					<img src="nodejs-logo.png" />
-				</a>
+		</div>
+	</div>
+	<div class="buddies_box">
+		<div class="header">Conectados</div>
+		<div class="inner">
+			<div class="buddies">
+				<ul id="connected">
+					
+				</ul>
 			</div>
 		</div>
+	</div>
+	<div class="difoosion_logo">
+		<a href="http://difoosion.com" target="blank">
+			<img src="difoosion-logo.png" />
+		</a>
+	</div>
+
+	<div class="powered_by_nodejs">
+		<a href="http://nodejs.org" target="blank">
+			<img src="nodejs-logo.png" />
+		</a>
 	</div>
 </body>

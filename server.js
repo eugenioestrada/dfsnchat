@@ -14,7 +14,7 @@ var mimeTypes = {
     "js": "text/javascript",
     "css": "text/css"};
 
-var timeout = 600000;
+var timeout = 300000;
 
 // Helpers
 

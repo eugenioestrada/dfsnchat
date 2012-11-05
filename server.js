@@ -15,6 +15,7 @@ var mimeTypes = {
     "css": "text/css"};
 
 var timeout = 300000;
+var inactive = 30000;
 
 // Helpers
 
@@ -73,7 +74,12 @@ var BuddyStore = (function () {
         	if (time > timeout) {
         		this.removeId(id);
         	}
+        	else if (time > inactive) {
+        		buddy.status = "inactive";
+    			buddies.push(buddy);
+        	}
     		else {
+    			buddy.status = "active";
     			buddies.push(buddy);
     		}
         }
@@ -101,6 +107,7 @@ var Buddy = (function () {
         this.id = id;
         this.name = name;
         this.timestamp = timestamp;
+        this.status = "active";
     }
     return Buddy;
 })();

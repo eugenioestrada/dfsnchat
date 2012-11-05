@@ -110,7 +110,7 @@
 						var buddies = eval("(" + response + ")");
 						var html = "";
 						jQuery.each(buddies, function() {
-							html += "<li>" + this.name + "</li>";
+							html += '<li class="' + this.status + '">' + this.name + "</li>";
 						});
 						$("#connected").empty();
 						$("#connected").append(html);
@@ -224,7 +224,7 @@
 				}
 			};
 			window.setInterval(refresh, 2500);
-			window.setInterval(loadBuddies, 10000);
+			window.setInterval(loadBuddies, 5000);
 			loadUser();
 			$("#username").focus();
 		});
@@ -238,7 +238,9 @@
 		.chat ul { list-style-type: none; padding: 0; height: 320px; overflow:auto }
 		.user { font-weight: bold; margin-bottom: 10px }
 		.buddies_box { position: fixed; right: 0; width: 160px; background-color: #fff; top: 50%; box-shadow: rgba(10, 10, 10, 0.6) 0 0 30px 15px }
-		.buddies ul { list-style-type: none; padding: 0; height: 160px; overflow:auto }
+		.active { list-style-image:url('active.png') }
+		.inactive { list-style-image:url('inactive.png') }
+		.buddies ul { list-style-type: none; padding: 0 0 0 20px; height: 160px; overflow:auto }
 		.message_box { margin: 2px auto }
 		.message_box input { width: 100% }
 		.powered_by_nodejs { position: fixed; margin: 10px; bottom: 0px; right: 0px } 

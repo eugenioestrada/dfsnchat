@@ -12,7 +12,7 @@
 			var loading = false;
 			var fails = 0;
 			var nuevosMensajes = 0;
-			var lastName = "";
+			var lastName = null;
 
 			if ($.browser.webkit) {
     			$("#message").attr("autocomplete", "off");
@@ -71,6 +71,9 @@
 						}
 
 						jQuery.each(messages, function() {
+							if (lastName != null && this.name != lastName) {
+								html += '<li class="separator"></li>';
+							}
 							if (this.name != lastName) {
 								lastName = this.name;
 								html += '<li class="user">' + this.name + '</li>';
@@ -236,11 +239,12 @@
 		.container_inner { width: 640px; position: fixed; bottom: 0; background-color: #fff; box-shadow: rgba(10, 10, 10, 0.6) 0 0 40px 20px }
 		.inner { padding: 10px }
 		.chat ul { list-style-type: none; padding: 0; height: 320px; overflow:auto }
-		.user { font-weight: bold; margin-bottom: 10px }
+		.user { font-weight: bold }
 		.buddies_box { position: fixed; right: 0; width: 160px; background-color: #fff; top: 50%; box-shadow: rgba(10, 10, 10, 0.6) 0 0 30px 15px }
 		.active { list-style-image:url('active.png') }
 		.inactive { list-style-image:url('inactive.png') }
 		.buddies ul { list-style-type: none; padding: 0 0 0 20px; height: 160px; overflow:auto }
+		.separator { padding-top: 20px }
 		.message_box { margin: 2px auto }
 		.message_box input { width: 100% }
 		.powered_by_nodejs { position: fixed; margin: 10px; bottom: 0px; right: 0px } 

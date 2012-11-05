@@ -68,7 +68,14 @@ var BuddyStore = (function () {
     BuddyStore.prototype.getAll = function () {
         var buddies = new Array();
         for(var id in this.buddiesById) {
-            buddies.push(this.getById(id));
+        	var buddy = this.getById(id);
+        	var time = (new Date()).getTime() - buddy.timestamp;
+        	if (time > timeout) {
+        		this.removeId(id);
+        	}
+    		else {
+    			buddies.push(buddy);
+    		}
         }
         return buddies;
     };
